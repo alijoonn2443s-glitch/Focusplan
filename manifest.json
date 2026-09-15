@@ -1,0 +1,16 @@
+{
+  "name": "FocusPlan",
+  "short_name": "FocusPlan",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080d20",
+  "theme_color": "#101a3d",
+  "icons": [
+    {
+      "src": "icons/Icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
