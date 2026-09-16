@@ -1,0 +1,12 @@
+{
+  "name": "FocusPlan",
+  "short_name": "FocusPlan",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#7182ff",
+  "description": "برنامه‌ریزی و پیگیری مطالعه FocusPlan",
+  "icons": [
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
