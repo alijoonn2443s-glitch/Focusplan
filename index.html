@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>FocusPlan | برنامه‌ریز کنکور</title>
+<meta content="#070b16" name="theme-color"/>
+<meta content="yes" name="mobile-web-app-capable"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="FocusPlan" name="apple-mobile-web-app-title"/>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="./mainfest.json" rel="manifest"/><link href="./icon.svg" rel="icon" type="image/svg+xml"/></head>
+<body class="stream-default"><div aria-label="در حال بارگذاری FocusPlan" id="startupSplash"><div class="splash-orbit orbit-a"></div><div class="splash-orbit orbit-b"></div><div class="splash-orbit orbit-c"></div><div class="splash-particles"></div><div class="splash-corner tl"></div><div class="splash-corner tr"></div><div class="splash-corner bl"></div><div class="splash-corner br"></div><div class="splash-content"><div class="splash-logo splash-logo-real"><div class="clean-logo"><div class="clean-ring r1"></div><div class="clean-ring r2"></div><div class="clean-dot"></div><div class="clean-letter f">F</div><div class="clean-letter p">P</div><div class="clean-line"></div></div></div><div class="splash-title"><span>FOCUS</span><em>PLAN</em></div><div class="splash-subtitle">هوشمندتر درس بخون، دقیق‌تر پیشرفت کن</div><div class="splash-loader"><span></span></div><div class="splash-loading-text"><span>در حال آماده‌سازی برنامه</span><b>0%</b></div><div class="splash-status">در حال آماده‌سازی برنامه</div></div></div><div class="floating-timer" id="floatingTimer" onclick="goToTimer()"><svg class="mini-ring" viewbox="0 0 40 40"><circle class="mini-bg" cx="20" cy="20" r="15"></circle><circle class="mini-progress" cx="20" cy="20" id="miniProgress" r="15"></circle></svg><span class="mini-time" id="miniTime">45:00</span><span class="mini-name" id="miniName">مطالعه</span></div>
+<div aria-live="polite" class="verify-overlay" id="timerVerify">
+<div class="verify-box">
+<div class="verify-icon">⏰📚</div>
+<h2>تایمرت تموم شد!</h2>
+<p>قبل از اینکه زمان مطالعه به آمار اضافه بشه، یه تأیید کوچیک لازمه.<br/><b>واقعاً در این مدت مشغول مطالعه بودی؟</b><br/>اگر بله، «بله، مطالعه کردم» رو بزن. اگر تایمر رو روشن گذاشتی و رفتی، گزینه «نه» رو بزن.</p>
+<div class="verify-count"><span id="verifySeconds">۶۰</span> ثانیه فرصت داری</div>
+<div class="row">
+<button class="btn" onclick="confirmTimerStudy(true)">✅ بله، مطالعه کردم</button>
+<button class="btn secondary" onclick="confirmTimerStudy(false)">❌ نه، مطالعه نکردم</button>
+</div>
+</div>
+</div>
+<div aria-live="polite" class="verify-overlay" id="timerSubjectModal">
+<div class="verify-box">
+<div class="verify-icon">📚</div>
+<h2>این مطالعه برای کدام درس بود؟</h2>
+<p>درسی را که در این مدت مطالعه کردی انتخاب کن تا زمان مطالعه دقیقاً در گزارش همان درس و PDF ثبت شود.</p>
+<label style="display:block;text-align:right;margin:12px 0 6px;color:var(--muted);font-size:13px">درس</label>
+<select id="timerSubjectSelect" style="width:100%;box-sizing:border-box"></select>
+<div class="row" style="margin-top:16px">
+<button class="btn" onclick="saveTimerStudySubject()">💾 ثبت مطالعه</button>
+<button class="btn secondary" onclick="closeTimerSubjectModal()">لغو</button>
+</div>
+</div>
+</div>
+<div class="reset-overlay" id="resetProgramsModal" onclick="if(event.target===this)closeResetPrograms()">
+<div class="reset-box">
+<div class="reset-icon">🗓️</div>
+<h2>انتخاب روز برای ریست برنامه</h2>
+<p>مشخص کن برنامه‌های کدام روز حذف شوند. برنامه‌ها و تست‌های همان روز پاک می‌شوند.</p>
+<input class="reset-date" id="resetProgramDate" onchange="updateResetPreview()" type="date"/>
+<div class="reset-preview" id="resetPreview">یک روز را انتخاب کن.</div>
+<div class="row reset-actions">
+<button class="btn danger" onclick="confirmResetPrograms()">🗑️ حذف برنامه این روز</button>
+<button class="btn secondary" onclick="closeResetPrograms()">انصراف</button>
+</div>
+</div>
+</div>
+<div aria-live="polite" class="verify-overlay" id="completionModal"><div class="verify-box" style="text-align:right"><div class="verify-icon" id="completionIcon">📚</div><h2 id="completionTitle">ثبت زمان واقعی مطالعه</h2><p id="completionDesc">برای ثبت دقیق پیشرفت، زمان واقعی را وارد کن.</p><div id="completionFields"></div><div class="row" style="margin-top:16px"><button class="btn" id="completionConfirm">ثبت و انجام شد ✅</button><button class="btn secondary" onclick="closeCompletionModal()">انصراف</button></div></div></div>
+<div class="auth" id="auth">
+<div class="auth-box">
+<div class="auth-brand-wrap"><div class="logo">🎯</div><div class="auth-brand-copy"><div class="auth-kicker">SMART STUDY PLANNER</div><div class="logo-title">FocusPlan</div></div></div>
+<div class="auth-sub" id="authSub">برنامه‌ریز هوشمند مطالعه و مدرسه<br/>از همین‌جا مسیر مطالعه‌ات را بساز.</div>
+<div class="auth-progress stage" id="authProgress"><i></i><i></i><i></i></div>
+<div class="auth-step-label"><span id="authStepHint">مرحله اول</span><b id="authStepTitle">انتخاب مقطع تحصیلی</b></div>
+<div class="auth-grid" id="stagePanel">
+<div class="stream-title">مقطع تحصیلی</div>
+<div class="streams stage-choices">
+<div class="stream stage-choice" data-stage="middle1"><b>🏫 متوسطه اول</b><small>پایه‌های هفتم، هشتم و نهم</small></div>
+<div class="stream stage-choice" data-stage="middle2"><b>🎓 متوسطه دوم</b><small>پایه‌های دهم، یازدهم و دوازدهم</small></div>
+</div>
+</div>
+<div class="auth-grid hidden" id="registerPanel">
+<button class="btn secondary back-stage" onclick="backToStageSelection()" type="button">← تغییر مقطع</button>
+<label>نام و نام خانوادگی<input id="fullName" placeholder="مثلاً علی احمدی"/></label>
+<label>نام کلاس<input id="className" placeholder="مثلاً ۱۱۶۱"/></label>
+<label>نام مدرسه<input id="schoolName" placeholder="مثلاً دبیرستان نمونه"/></label>
+<label>پایه تحصیلی<select id="grade"></select></label>
+<div id="streamField">
+<div class="stream-title">رشته تحصیلی</div>
+<div class="streams">
+<div class="stream" data-stream="تجربی"><b>🧬 تجربی</b><small>پزشکی، دندان، دارو و...</small></div>
+<div class="stream" data-stream="ریاضی"><b>📐 ریاضی</b><small>فنی و مهندسی</small></div>
+<div class="stream" data-stream="انسانی"><b>📚 انسانی</b><small>حقوق، روانشناسی و...</small></div>
+</div>
+</div>
+<div class="auth-actions"><button class="btn" onclick="createAccount()">ساخت پروفایل و ورود 🚀</button></div>
+</div>
+<div class="login-panel hidden" id="loginPanel">
+<h3>خوش برگشتی 👋</h3>
+<p class="muted">مشخصات قبلی شما ذخیره شده است. برای ورود نیازی به وارد کردن دوباره اطلاعات نیست.</p>
+<div class="saved-profile">
+<div><span>نام</span><b id="loginName">-</b></div>
+<div><span>کلاس</span><b id="loginClass">-</b></div>
+<div><span>مدرسه</span><b id="loginSchool">-</b></div>
+<div><span>مقطع</span><b id="loginStage">-</b></div>
+<div><span>رشته</span><b id="loginStream">-</b></div>
+<div><span>پایه</span><b id="loginGrade">-</b></div>
+</div>
+<div class="auth-actions"><button class="btn" onclick="loginWithSavedProfile()" type="button">ادامه با اطلاعات قبلی 🚀</button>
+<button class="btn secondary" onclick="startNewLogin()" type="button">ساخت پروفایل جدید ✏️</button></div>
+</div>
+<div class="notice">اطلاعات فقط داخل مرورگر همین دستگاه ذخیره می‌شود؛ حساب آنلاین ساخته نمی‌شود.</div>
+</div>
+</div>
+<div class="hidden" id="app">
+<header class="app-header-simple">
+<button aria-label="خروج" class="header-action header-exit" onclick="logout()" type="button">خروج</button>
+<div class="brand header-brand">🎯 Focus<span>Plan</span></div>
+<button aria-label="تنظیمات" class="header-action header-settings" onclick="openSettings()" title="تنظیمات" type="button">⚙️</button>
+</header>
+<main>
+<div class="hero"><h1 id="welcome">سلام 👋</h1><p id="streamLabel"></p></div>
+<div class="fp-global-search" dir="rtl" id="fpGlobalSearchWrap">
+<div class="fp-search-box">
+<span class="fp-search-icon">⌕</span>
+<input aria-label="جست‌وجوی سراسری" autocomplete="off" id="fpGlobalSearch" placeholder="هر چیزی می‌خوای پیدا کن..." type="search"/>
+<button aria-label="پاک کردن جست‌وجو" class="fp-search-clear" id="fpSearchClear" type="button">×</button>
+</div>
+<div class="fp-search-results" hidden="" id="fpSearchResults"></div>
+</div>
+<div class="tabs focusplan-tabs">
+<button class="btn active" data-tab="dash">داشبورد</button>
+<button class="btn secondary" data-tab="plan">برنامه</button>
+<button class="btn secondary" data-tab="performance">مرکز عملکرد</button>
+<button class="btn secondary" data-tab="timer">تایمر</button>
+<button class="btn secondary" data-tab="stats">آمار</button>
+<button class="btn secondary" data-tab="moreFeatures">قابلیت‌های بیشتر</button>
+<button class="btn secondary" data-tab="about">درباره برنامه</button>
+<button class="btn secondary" data-tab="pdf">PDF</button>
+<button class="btn secondary" data-tab="archives">آرشیوها</button>
+</div>
+<section class="section active" id="dash">
+<h2>داشبورد ✨</h2>
+<div class="dashboard-identity-grid">
+<div class="card dashboard-level-card">
+<div class="dashboard-level-main"><div><span class="settings-kicker">سطح فعلی</span><h3 id="dashLevelName">سطح ۱ · تازه‌کار</h3><p class="muted" id="dashLevelXp">۰ XP</p></div><div class="dashboard-level-badge" id="dashLevelBadge">۱</div></div>
+<div class="pro-bar dashboard-level-bar"><i id="dashLevelBar"></i></div>
+<div class="dashboard-level-foot"><span id="dashLevelNext">۱۰۰ XP تا سطح بعد</span><button class="btn secondary" onclick="openPerformanceMedals()" type="button">🏆 مدال‌ها</button></div>
+</div>
+<div class="card dashboard-medal-card">
+<div class="dashboard-medal-icon" id="dashFeaturedMedalIcon">🎉</div>
+<div class="dashboard-medal-copy"><span class="settings-kicker">مدال نمایشی</span><h3 id="dashFeaturedMedalTitle">اولین ورود</h3><p class="muted" id="dashFeaturedMedalDesc">به FocusPlan خوش آمدی!</p></div>
+<button class="btn secondary" onclick="openPerformanceMedals()" type="button">تغییر</button>
+</div>
+</div><br/><div class="grid">
+<div class="card stat"><span class="muted">ساعت مطالعه امروز</span><b id="dashHours">۰:۰۰</b></div>
+<div class="card stat"><span class="muted">تست امروز</span><b id="dashTests">۰</b></div>
+<div class="card stat"><span class="muted">پیشرفت برنامه</span><b id="dashDone">۰٪</b></div>
+<div class="card stat"><span class="muted">هدف امروز</span><b id="dashGoal">۸ ساعت</b><div class="row" style="justify-content:flex-start;margin-top:10px"><input id="dashGoalInput" min="1" placeholder="دقیقه" step="15" style="max-width:150px;margin:0" type="number"/><button class="btn" onclick="saveDashboardGoal()">تنظیم هدف</button></div></div></div><br/>
+<div class="card"><div class="weekly-dashboard-head"><div><h3>برنامه فردا 📚</h3><p class="muted">فقط برنامه‌هایی که برای فردا ثبت کرده‌ای اینجا نمایش داده می‌شوند.</p></div><button class="btn secondary" onclick="toggleDashboardTomorrowManualOrder()" type="button">↕️ چینش برنامه‌ها</button></div><p class="muted fp-order-note" id="dashboardOrderHint">برای جابه‌جایی برنامه‌های فردا، چینش برنامه‌ها را فعال کن.</p><div class="dashboard-plans" id="subjectCards"></div></div><br/><div class="card"><div class="weekly-dashboard-head"><div><h3>میزان تست 📝</h3><p class="muted">تست‌هایی که برای امروز ثبت کرده‌ای؛ درست مثل برنامه‌ها از همین‌جا تیک بزن.</p></div><button class="btn secondary" onclick="toggleDashboardTestManualOrder()" type="button">↕️ چینش تست‌ها</button></div><p class="muted fp-order-note" id="dashboardTestOrderHint">برای جابه‌جایی تست‌های امروز، چینش تست‌ها را فعال کن.</p><div class="dashboard-plans" id="dashboardTests"></div></div><br/>
+<div class="card"><h3>پیشرفت هدف امروز</h3><div class="progress"><i id="goalBar"></i></div><p class="muted" id="goalText"></p><div class="row" style="justify-content:flex-start;margin-top:14px"><button class="btn danger" onclick="resetToday()">🔄 ریست امروز</button><button class="btn danger" onclick="resetAllPrograms()">🗑️ ریست همه برنامه‌ها</button></div><p class="muted" style="margin-top:8px;font-size:12px">ریست امروز فقط وضعیت امروز را از نو شروع می‌کند. «ریست همه برنامه‌ها» برنامه‌ها و میزان تست‌های همان روز را حذف می‌کند.</p></div><br/><div class="card weekly-dashboard-card" id="weeklyDashboardCard"><div class="weekly-dashboard-head"><div><h3>📅 برنامه این هفته</h3><p class="muted" id="weekOverviewHint">برنامه این هفته از شنبه تا جمعه را همین‌جا ببین.</p></div><button class="btn secondary weekly-view-btn" onclick="openWeeklyOverview()" type="button">👀 برنامه این هفته را ببین</button></div><div class="week-overview-panel" id="weekOverview" style="display:none"></div></div><br/><div class="card fp-school-weekly-table-card" id="schoolWeeklyDashboardCard"><div class="weekly-dashboard-head"><div><h3>برنامه مدرسه فردا 🏫</h3><p class="muted" id="schoolDashboardDay">برنامه زنگ‌های فردای مدرسه</p></div></div><div class="school-dashboard-list" id="schoolDashboardList"></div></div><br/></section>
+<section class="section" id="plan"><h2>برنامه مطالعاتی 📅</h2><div class="card tomorrow-card"><div class="tomorrow-head"><div><h3>🤖 پیشنهاد برنامه فردا</h3><p class="muted">بر اساس درس‌های کم‌کار و عملکرد اخیرت.</p></div><button class="btn" onclick="refreshTomorrowPlan()" type="button">🔄 به‌روزرسانی / پیشنهاد جدید</button></div><div class="tomorrow-suggestion" id="tomorrowPlanSuggestion"></div>
+<div class="tomorrow-manual-add"><div><b>➕ درس دلخواه برای فردا</b><small>اگر پیشنهادی که می‌بینی مناسب نیست، خودت هر درسی را اضافه کن.</small></div><div class="tomorrow-manual-fields"><input id="tomorrowManualSubject" placeholder="نام درس"/><input id="tomorrowManualMinutes" min="1" placeholder="دقیقه" step="15" type="number"/><input id="tomorrowManualTopic" placeholder="مبحث (اختیاری)"/><button class="btn" onclick="addManualTomorrowSuggestion()" type="button">➕ افزودن</button></div></div></div><br/><div class="card">
+<div class="card copy-repeat-card"><div class="copy-repeat-head"><div><h3>📋 کپی و تکرار برنامه</h3><p class="muted">برنامه‌های یک روز را سریع برای فردا کپی کن یا برای چند روز آینده تکرارشان کن.</p></div><div class="copy-repeat-icon">🔁</div></div><div class="copy-repeat-controls"><label>روز مبنا<input id="copyRepeatSourceDate" type="date"/></label><label>تعداد روز برای تکرار<select id="copyRepeatDays"><option value="2">۲ روز</option><option value="3">۳ روز</option><option value="4">۴ روز</option><option value="5">۵ روز</option><option selected="" value="7">۷ روز</option><option value="14">۱۴ روز</option></select></label></div><div class="copy-repeat-actions"><button class="btn" onclick="copyProgramToTomorrow()" type="button">📋 کپی برنامه برای فردا</button><button class="btn secondary" onclick="repeatProgramForward()" type="button">🔁 تکرار برنامه در روزهای آینده</button></div><div class="copy-repeat-note">وضعیت انجام‌شدن و مطالعه واقعیِ برنامه‌های کپی‌شده از نو شروع می‌شود؛ زمان، درس، مبحث و علامت «مهم» حفظ می‌شوند.</div></div><br/><div class="form"><label>تاریخ<input id="pDate" type="date"/></label><label>درس<select id="pSubject"><option>در حال بارگذاری...</option></select></label><label>مبحث / فصل<input id="pTopic" placeholder="مثلاً فصل اول"/></label><label>دقیقه<input id="pMinutes" min="1" placeholder="مثلاً ۶۰" type="number"/></label><label class="check-field"><span>⭐ برنامه مهم</span><input id="pImportant" type="checkbox"/></label><label class="fp-tags-input">برچسب‌ها <input id="pTags" placeholder="مثلاً امتحان، فوری، مرور — با ویرگول جدا کن"/></label><button class="btn" onclick="addPlan()" type="button">افزودن برنامه</button></div>
+<table><thead><tr><th>تاریخ</th><th>درس</th><th>مبحث</th><th>برنامه</th><th>تست</th><th>مطالعه واقعی</th><th></th></tr></thead><tbody id="planList"></tbody></table></div>
+<div class="plan-tests-divider"><span>📝 میزان تست</span><i></i></div>
+<div class="card test-manager-card">
+<div class="test-manager-head"><div><h3>ثبت و پیگیری تست‌ها</h3><p class="muted">تست‌ها را اینجا ثبت کن؛ موارد ثبت‌شده مرتب بر اساس تاریخ نمایش داده می‌شوند و نتیجه واقعی هم جداگانه مشخص است.</p></div><div class="test-manager-icon">📝</div></div>
+<div class="form"><label>مبحث تست<input id="testTopic" placeholder="مثلاً تست‌های فصل اول"/></label><label>درس<select id="testSubject"><option>در حال بارگذاری...</option></select></label><label>تعداد تست<input id="testCount" min="1" placeholder="مثلاً ۲۰" type="number"/></label><label>تاریخ<input id="testDate" type="date"/></label><label class="check-field"><span>⭐ تست مهم</span><input id="tImportant" type="checkbox"/></label><label class="fp-tags-input">برچسب‌ها <input id="tTags" placeholder="مثلاً کنکور، زمان‌دار، مرور — با ویرگول جدا کن"/></label><button class="btn" onclick="addTestTask()" type="button">➕ افزودن تست</button></div>
+<div class="test-list-wrap"><table class="test-table"><thead><tr><th>تاریخ</th><th>درس</th><th>مبحث</th><th>تعداد</th><th>نتیجه واقعی</th><th>وضعیت</th><th></th></tr></thead><tbody id="testList"></tbody></table></div>
+</div><br/>
+<div class="card important-plans-card important-plans-below-tests"><div class="important-head"><div><h3>برنامه‌های مهم</h3><p class="muted">برنامه‌ها و تست‌هایی که مهم علامت زده‌ای اینجا یک‌جا نمایش داده می‌شوند.</p></div><span class="important-badge">مهم</span></div><div class="important-plans-list" id="importantPlansList"></div></div></section>
+<section class="section" id="performance"><h2>مرکز عملکرد 🚀</h2>
+<div class="card performance-hero"><div><span class="settings-kicker">تحلیل شخصی</span><h3>📊 وضعیت کلی عملکردت</h3><p class="muted">اینجا می‌توانی روند، افت یا رشد، مقایسه با خود قبلی و دستاوردهایت را یک‌جا ببینی.</p></div><div class="performance-score" id="performanceScore">۰٪</div></div><br/>
+<div class="grid"><div class="card stat"><span class="muted">۷ روز اخیر</span><b id="currentWeekStudy">۰:۰۰</b></div><div class="card stat"><span class="muted">۷ روز قبل</span><b id="previousWeekStudy">۰:۰۰</b></div><div class="card stat"><span class="muted">تغییر نسبت به قبل</span><b id="performanceDelta">۰٪</b></div><div class="card stat"><span class="muted">استریک</span><b id="performanceStreak">۰ روز</b></div></div><br/>
+<div class="card"><h3>🆚 مقایسه با خود قبلی</h3><p class="muted" id="selfCompareText">عملکرد این هفته با ۷ روز قبل مقایسه می‌شود.</p><div class="compare-bars"><div class="compare-row"><span>مطالعه</span><div class="compare-track"><i id="compareCurrentStudy"></i></div><b id="compareCurrentStudyText">۰</b></div><div class="compare-row"><span>مطالعه قبلی</span><div class="compare-track"><i id="comparePreviousStudy"></i></div><b id="comparePreviousStudyText">۰</b></div><div class="compare-row"><span>تست</span><div class="compare-track"><i id="compareCurrentTests"></i></div><b id="compareCurrentTestsText">۰</b></div><div class="compare-row"><span>تست قبلی</span><div class="compare-track"><i id="comparePreviousTests"></i></div><b id="comparePreviousTestsText">۰</b></div></div></div><br/>
+<div class="card"><h3>📉 نمودار عملکرد ۱۴ روزه</h3><p class="muted" id="performanceTrendText">روند ۱۴ روز اخیر</p><div class="performance-chart-wrap"><svg id="performanceCenterChart" preserveaspectratio="none" viewbox="0 0 760 250"></svg></div><div class="muted" style="display:flex;gap:18px;justify-content:center;margin-top:8px;font-size:12px"><span>━ مطالعه واقعی</span><span>┄ برنامه‌ریزی‌شده</span></div></div><br/><div class="card subject-performance-chart-card"><div class="settings-section-head"><div><span class="settings-kicker">مقایسه درس‌ها</span><h3>📚 نمودار درس‌ها</h3><p class="muted">برای هر درس یک نمودار جداگانه از عملکرد همین ماه نمایش داده می‌شود. با شروع ماه جدید، نمودارها خودکار از صفر شروع می‌شوند.</p></div><span class="settings-section-icon">📊</span></div><div class="subject-performance-chart" id="subjectPerformanceChart"></div></div><br/>
+</section>
+<section class="section" id="timer"><h2>پومودورو ⏱️</h2><div class="card center timer-card-pro"><div aria-hidden="true" class="timer-scene-lines"></div><div class="timer-topline"><span>حالت تمرکز</span><b>● تایمر فعال</b></div><div class="form timer-inputs-pro" style="grid-template-columns:2fr 1fr"><label>اسم تایمر<input id="timerName" placeholder="مثلاً مطالعه زیست"/></label><label>مدت (دقیقه)<input id="timerMinutes" min="1" type="number" value="45"/></label></div><div class="timer-wrap"><div class="timer-orbit orbit-one"></div><div class="timer-orbit orbit-two"></div><div class="timer-orbit orbit-three"></div><div class="timer-glow"></div><div class="timer-grid"></div><div class="timer-spark spark-a"></div><div class="timer-spark spark-b"></div><div class="timer-spark spark-c"></div><svg class="timer-ring" viewbox="0 0 240 240"><defs><lineargradient id="timerGradient" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="var(--accent)"></stop><stop offset="52%" stop-color="var(--accent2)"></stop><stop offset="100%" stop-color="#d7aaff"></stop></lineargradient></defs><circle class="timer-ring-bg" cx="120" cy="120" r="102"></circle><circle class="timer-ring-progress" cx="120" cy="120" id="timerProgress" r="102"></circle><circle class="timer-wave-progress" cx="120" cy="120" id="timerWaveProgress" r="102"></circle></svg><div class="timer-center"><div class="timer-kicker">زمان باقی‌مانده</div><div class="timer" id="clock">45:00</div><div class="timer-status" id="timerStatus">آماده شروع</div><div class="timer-label-pro" id="timerLabel">مطالعه</div></div></div><div class="timer-actions-pro row" style="margin-top:16px"><button class="btn" onclick="startTimer()">▶ شروع</button><button class="btn secondary" onclick="pauseTimer()">Ⅱ توقف</button><button class="btn secondary" onclick="resetTimer()">↻ ریست</button><button class="btn secondary" onclick="setTimerFromInputs()">⚙ اعمال زمان</button></div></div>
+<div class="card smart-reminder-card" style="margin-top:18px">
+<div class="smart-reminder-head"><div><span class="settings-kicker">SMART REMINDER</span><h3>🔔 یادآور هوشمند</h3><p class="muted">برای شروع مطالعه، تاریخ و ساعت دقیق را کوک کن و اسم درس را هم مشخص کن.</p></div><button class="btn secondary" onclick="requestReminderPermission()" type="button">فعال‌سازی اعلان‌ها</button></div>
+<div class="form smart-reminder-form" style="grid-template-columns:1fr 1fr 1fr 1fr">
+<label>اسم درس<input id="reminderSubject" placeholder="مثلاً زیست"/></label>
+<label>تاریخ<input id="reminderDate" type="date"/></label>
+<label>ساعت<input id="reminderTime" step="60" type="time"/></label>
+<label>مدت مطالعه (دقیقه)<input id="reminderDuration" min="1" type="number" value="45"/></label>
+</div>
+<div class="row" style="margin-top:12px"><button class="btn" onclick="saveReminder()" type="button">⏰ کوک یادآور</button><button class="btn secondary" onclick="clearReminderForm()" type="button">پاک کردن فرم</button></div>
+<input id="editingReminderId" type="hidden" value=""/>
+<div id="reminderList" style="margin-top:18px"></div>
+</div></section>
+<section class="section" id="stats"><h2>آمار و پیشرفت 📊</h2><div class="grid">
+<div class="card stat"><span class="muted">کل مطالعه</span><b id="totalHours">۰</b></div><div class="card stat"><span class="muted">کل تست</span><b id="totalTests">۰</b></div><div class="card stat"><span class="muted">میانگین روزانه</span><b id="avgHours">۰</b></div><div class="card stat"><span class="muted">درصد برنامه‌ها</span><b id="totalDone">۰٪</b></div></div><br/>
+<div class="card"><h3>📚 تحلیل درس‌ها</h3><p class="muted">میزان مطالعه واقعی، تست و برنامه هر درس در ماه جاری را دقیق ببین.</p><div class="subject-analysis" id="subjectAnalytics"></div></div><br/>
+<div class="card percent-card">
+<h3>🧮 درصدگیر آزمون</h3>
+<p class="muted">تعداد سؤال‌ها و جواب‌های درست و غلط را وارد کن؛ سؤال‌های نزده و درصد به‌صورت خودکار محاسبه می‌شوند.</p>
+<div class="form percent-form">
+<label>تعداد سؤالات<input id="pctTotal" inputmode="numeric" min="0" placeholder="مثلاً ۲۰" step="1" type="number"/></label>
+<label>سؤالات درست<input id="pctCorrect" inputmode="numeric" min="0" placeholder="مثلاً ۱۵" step="1" type="number"/></label>
+<label>سؤالات غلط<input id="pctWrong" inputmode="numeric" min="0" placeholder="مثلاً ۳" step="1" type="number"/></label>
+</div>
+<button class="btn" onclick="calculatePercent()" style="margin-top:14px">🧮 محاسبه درصد</button>
+<div class="grid" style="margin-top:14px">
+<div class="card stat"><span class="muted">سؤالات نزده</span><b id="pctBlank">۰</b></div>
+<div class="card stat"><span class="muted">درصد بدون نمره منفی</span><b id="pctResultNoNegative">۰٪</b></div>
+<div class="card stat"><span class="muted">درصد با نمره منفی</span><b id="pctResultNegative">۰٪</b></div>
+</div>
+<p class="notice" id="pctError" style="display:none"></p>
+</div>
+</section>
+<section class="section" id="pdf"><h2>گزارش هفتگی PDF 📄</h2>
+<div class="card center"><h3 id="pdfRange">هفته جاری</h3><div aria-live="polite" class="pdf-week-countdown" id="pdfWeekCountdown"><span>⏳ پایان PDF این هفته</span><b id="pdfCountdownValue">در حال محاسبه...</b><small id="pdfCountdownTarget">—</small></div><p class="muted">گزارش این هفته از شنبه تا جمعه، شامل زمان مطالعه واقعی، تست‌ها، برنامه‌ها و پیشرفت برنامه، با تفکیک هر روز.</p>
+<div class="row"><button class="btn" onclick="downloadWeeklyPDF()">⬇️ دانلود PDF هفته</button><button class="btn secondary" onclick="printWeeklyPDF()">🖨️ چاپ / ذخیره دستی</button><button class="btn danger" onclick="resetCurrentPdf()">🔄 ریست PDF</button></div>
+<p class="notice">هر بار PDF با یک نام جدید ساخته می‌شود تا نسخه قدیمی با نسخه جدید قاطی نشود.</p></div>
+<div class="weekly-report card" id="weeklyReportPreview" style="margin-top:16px"></div></section>
+<section class="section" id="archives"><h2>آرشیوها 🗂️</h2><div class="card archive-intro"><div class="archive-intro-icon">🗂️</div><div><h3>آرشیو PDF و نمودارهای درس‌ها</h3><p class="muted">آرشیوها به دو بخش جدا تقسیم شده‌اند: گزارش‌های PDF هفتگی و نمودارهای عملکرد ماهانه. با شروع ماه جدید، نمودارهای ماه قبل خودکار ذخیره می‌شوند و نمودار ماه جاری از صفر شروع می‌شود.</p></div></div><div class="archive-switcher" role="tablist"><button class="archive-switch active" onclick="switchArchivePanel('pdf')" type="button">📄 آرشیو PDF</button><button class="archive-switch" onclick="switchArchivePanel('charts')" type="button">📊 آرشیو نمودارها</button></div><div class="archive-panel active" id="pdfArchivePanel"><div class="pdf-archive-list" id="pdfArchiveList"></div></div><div class="archive-panel" id="chartArchivePanel"><div class="chart-archive-list" id="chartArchiveList"></div></div></section>
+<section class="section" id="moreFeatures">
+<h2>🚀 قابلیت‌های بیشتر</h2>
+<div class="card fp-more-calendar-card">
+<div class="fp-cal-head">
+<button class="btn secondary" onclick="fpCalMove(-1)" type="button">‹ ماه قبل</button>
+<div class="fp-cal-title-wrap"><strong id="fpCalTitle"></strong><div class="fp-cal-sub">تقویم فعالیت مطالعه و تست</div></div>
+<button class="btn secondary" onclick="fpCalMove(1)" type="button">ماه بعد ›</button>
+</div>
+<div class="fp-cal-legend">
+<span><i class="fp-dot fp-dot-0"></i>بدون فعالیت</span>
+<span><i class="fp-dot fp-dot-1"></i>فعالیت کم</span>
+<span><i class="fp-dot fp-dot-2"></i>فعالیت متوسط</span>
+<span><i class="fp-dot fp-dot-3"></i>فعالیت زیاد</span>
+</div>
+<div class="fp-calendar-grid" id="fpCalendarGrid"></div>
+<div class="fp-cal-details" id="fpCalDetails">یک روز را انتخاب کن تا جزئیاتش نمایش داده شود.</div>
+</div>
+<div class="card fp-compare-card">
+<div class="fp-compare-head">
+<div><div class="fp-compare-kicker">📊 تحلیل حرفه‌ای</div><h3>مقایسه عملکرد</h3><p class="muted">عملکردت را با دوره قبل مقایسه کن و دقیق ببین کجا بهتر یا ضعیف‌تر شده‌ای.</p></div>
+<div aria-label="دوره مقایسه" class="fp-compare-switch" role="tablist">
+<button class="active" id="fpCompare7Btn" onclick="fpCompareSetPeriod(7)" type="button">۷ روز</button>
+<button id="fpCompare30Btn" onclick="fpCompareSetPeriod(30)" type="button">۳۰ روز</button>
+</div>
+</div>
+<div class="fp-compare-summary" id="fpCompareSummary"></div>
+<div class="fp-compare-metrics" id="fpCompareMetrics"></div>
+<div class="fp-compare-grid">
+<div class="fp-compare-panel"><div class="fp-compare-panel-title">📈 روند مطالعه</div><div class="fp-compare-bars" id="fpCompareStudyChart"></div></div>
+<div class="fp-compare-panel"><div class="fp-compare-panel-title">🎯 تغییر عملکرد درس‌ها</div><div class="fp-compare-subjects" id="fpCompareSubjects"></div></div>
+</div>
+</div>
+<div class="card fp-weekly-command-center">
+<div class="fp-weekly-command-head">
+<div>
+<div class="fp-weekly-kicker">🎯 برنامه‌ریزی هوشمند هفته</div>
+<h3>مرکز اهداف و چالش‌های هفتگی</h3>
+<p class="muted">هدف‌ها فقط برای همین هفته فعال‌اند و با شروع هفته جدید، هفته تازه‌ای با هدف‌های جدید شروع می‌شود. پیشرفت‌ها از داده‌های واقعی مطالعه، تست و برنامه‌ها محاسبه می‌شوند.</p>
+</div>
+<div class="fp-weekly-week-badge" id="weeklyCenterWeekBadge">هفته جاری</div>
+</div>
+<div class="fp-weekly-goal-editor">
+<div class="fp-weekly-editor-title"><span>⚙️</span><div><b>هدف‌های اصلی هفته</b><small>دو هدف عددی مشخص کن تا عملکرد هفته دقیق و قابل اندازه‌گیری باشد.</small></div></div>
+<div class="fp-weekly-form-grid">
+<label><span>📚 هدف مطالعه هفتگی</span><div class="fp-input-unit"><input id="weeklyGoalInput" min="1" placeholder="مثلاً ۲۴۰۰" step="15" type="number"/><em>دقیقه</em></div></label>
+<label><span>📝 هدف تست هفتگی</span><div class="fp-input-unit"><input id="weeklyTestGoalInput" min="1" placeholder="مثلاً ۳۰۰" step="10" type="number"/><em>تست</em></div></label>
+</div>
+<div class="fp-weekly-action-row"><button class="btn" onclick="saveWeeklyGoals()" type="button">💾 ذخیره هدف‌های این هفته</button><button class="btn secondary" onclick="clearWeeklyGoals()" type="button">🗑️ پاک کردن هدف این هفته</button></div>
+<div class="weekly-goal-live-target" id="weeklyGoalLiveTarget">🎯 هدف این هفته: تعیین نشده</div>
+</div>
+<div class="fp-weekly-progress-head"><div><span class="fp-weekly-kicker">📈 وضعیت زنده</span><h4>پیشرفت هدف‌های این هفته</h4></div><div class="fp-weekly-overall-score" id="weeklyCenterOverall">۰٪</div></div>
+<div class="fp-weekly-progress-grid">
+<div class="fp-weekly-progress-card"><div class="fp-wpc-top"><span>📚 مطالعه</span><b id="weeklyStudyGoalText">—</b></div><div class="weekly-progress-track"><i id="weeklyStudyGoalBar"></i></div><div class="fp-wpc-meta"><span id="weeklyStudyGoalValue">۰ دقیقه</span><span id="weeklyStudyGoalTarget">هدف: تعیین نشده</span></div></div>
+<div class="fp-weekly-progress-card test"><div class="fp-wpc-top"><span>📝 تست</span><b id="weeklyTestGoalText">—</b></div><div class="weekly-progress-track test"><i id="weeklyTestGoalBar"></i></div><div class="fp-wpc-meta"><span id="weeklyTestGoalValue">۰ تست</span><span id="weeklyTestGoalTarget">هدف: تعیین نشده</span></div></div>
+</div>
+<div class="weekly-goal-status" id="weeklyGoalAdvice">هنوز هدف هفتگی‌ات را تعیین نکرده‌ای؛ از بالا یک هدف مشخص کن. 🎯</div>
+<div class="weekly-goal-target-show" id="weeklyGoalTargetShow" style="display:none"><div class="weekly-goal-summary-head"><span>🎯 هدف تعیین‌شده تو</span><small>این هدف تا پایان هفته معیار اصلی پیشرفت توست.</small></div><div class="weekly-goal-summary-grid"><div><span>📚 هدف مطالعه</span><b id="weeklyGoalStudyTargetSummary">تعیین نشده</b></div><div><span>📝 هدف تست</span><b id="weeklyGoalTestTargetSummary">تعیین نشده</b></div></div></div>
+<div class="fp-challenge-section">
+<div class="fp-weekly-progress-head"><div><span class="fp-weekly-kicker">🏆 چالش‌های هفتگی</span><h4>ماموریت‌های این هفته</h4><p class="muted">چالش‌ها خودکار از عملکرد همین هفته محاسبه می‌شوند و با رفرش یا جابه‌جایی تب از بین نمی‌روند.</p></div></div>
+<div class="fp-challenge-grid" id="weeklyChallengeGrid"></div>
+</div>
+</div><div class="card fp-school-weekly-table-card" id="schoolWeeklyTableCard">
+<div class="fp-school-table-wrap">
+<table class="fp-school-weekly-table">
+<thead><tr><th>زنگ</th><th>شنبه</th><th>یکشنبه</th><th>دوشنبه</th><th>سه‌شنبه</th><th>چهارشنبه</th></tr></thead>
+<tbody id="schoolWeeklyTableBody"><tr><td class="fp-school-period-cell">زنگ 1</td><td aria-label="شنبه، زنگ 1، خالی" class="fp-school-editable" data-school-table-day="0" data-school-table-row="0" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="یکشنبه، زنگ 1، خالی" class="fp-school-editable" data-school-table-day="1" data-school-table-row="0" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="دوشنبه، زنگ 1، خالی" class="fp-school-editable" data-school-table-day="2" data-school-table-row="0" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="سه‌شنبه، زنگ 1، خالی" class="fp-school-editable" data-school-table-day="3" data-school-table-row="0" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="چهارشنبه، زنگ 1، خالی" class="fp-school-editable" data-school-table-day="4" data-school-table-row="0" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td></tr><tr><td class="fp-school-period-cell">زنگ 2</td><td aria-label="شنبه، زنگ 2، خالی" class="fp-school-editable" data-school-table-day="0" data-school-table-row="1" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="یکشنبه، زنگ 2، خالی" class="fp-school-editable" data-school-table-day="1" data-school-table-row="1" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="دوشنبه، زنگ 2، خالی" class="fp-school-editable" data-school-table-day="2" data-school-table-row="1" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="سه‌شنبه، زنگ 2، خالی" class="fp-school-editable" data-school-table-day="3" data-school-table-row="1" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="چهارشنبه، زنگ 2، خالی" class="fp-school-editable" data-school-table-day="4" data-school-table-row="1" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td></tr><tr><td class="fp-school-period-cell">زنگ 3</td><td aria-label="شنبه، زنگ 3، خالی" class="fp-school-editable" data-school-table-day="0" data-school-table-row="2" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="یکشنبه، زنگ 3، خالی" class="fp-school-editable" data-school-table-day="1" data-school-table-row="2" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="دوشنبه، زنگ 3، خالی" class="fp-school-editable" data-school-table-day="2" data-school-table-row="2" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="سه‌شنبه، زنگ 3، خالی" class="fp-school-editable" data-school-table-day="3" data-school-table-row="2" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="چهارشنبه، زنگ 3، خالی" class="fp-school-editable" data-school-table-day="4" data-school-table-row="2" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td></tr><tr><td class="fp-school-period-cell">زنگ 4</td><td aria-label="شنبه، زنگ 4، خالی" class="fp-school-editable" data-school-table-day="0" data-school-table-row="3" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="یکشنبه، زنگ 4، خالی" class="fp-school-editable" data-school-table-day="1" data-school-table-row="3" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="دوشنبه، زنگ 4، خالی" class="fp-school-editable" data-school-table-day="2" data-school-table-row="3" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="سه‌شنبه، زنگ 4، خالی" class="fp-school-editable" data-school-table-day="3" data-school-table-row="3" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td><td aria-label="چهارشنبه، زنگ 4، خالی" class="fp-school-editable" data-school-table-day="4" data-school-table-row="3" role="button" tabindex="0"><div class="fp-school-cell-value empty"> </div></td></tr></tbody>
+</table>
+</div>
+</div>
+</section>
+<div aria-hidden="true" class="fp-school-cell-modal" id="schoolCellModal">
+<div aria-labelledby="schoolCellModalTitle" aria-modal="true" class="fp-school-cell-modal-box" role="dialog">
+<h3 id="schoolCellModalTitle">ثبت درس</h3>
+<p class="muted" id="schoolCellModalHint">نام درس این خانه را وارد کن.</p>
+<input class="fp-school-cell-input" id="schoolCellInput" maxlength="40" placeholder="مثلاً زیست‌شناسی" type="text"/>
+<div class="fp-school-cell-modal-actions">
+<button class="btn" onclick="saveSchoolCell()" type="button">💾 ذخیره خانه</button>
+<button class="btn secondary" onclick="closeSchoolCellModal()" type="button">انصراف</button>
+</div>
+<div class="fp-school-save-note">بعد از زدن «ذخیره خانه»، درس همان لحظه در جدول می‌نشیند و روی همین دستگاه ذخیره می‌شود.</div>
+</div>
+</div>
+<script src="./js/fp-01.js"></script>
+<section class="section" id="about">
+<h2>✨ درباره برنامه</h2>
+<div class="about-grid">
+<div class="card">
+<div class="about-icon">🎓</div>
+<h3>FocusPlan</h3>
+<p class="about-text">FocusPlan یک برنامه‌ریز مطالعه شخصی و یکپارچه برای دانش‌آموزان است که بخش‌های برنامه‌ریزی، ثبت مطالعه واقعی، تست‌زنی، تایمر، یادآورها، تحلیل عملکرد، سطح و XP، دستاوردها و مدال‌ها، گزارش هفتگی PDF، آرشیو، برنامه هفتگی مدرسه و دستیار هوش مصنوعی را در یک محیط واحد جمع می‌کند.</p>
+<hr/>
+<h3>📖 راهنمای کامل و مو‌به‌مو</h3>
+<div class="about-guide">
+<div class="card" style="margin:0 0 16px;border:1px solid rgba(110,125,255,.18);background:linear-gradient(135deg,rgba(110,125,255,.08),rgba(160,105,255,.06));padding:18px;border-radius:20px">
+<h3 style="margin-top:0">🤖 دستیار هوش مصنوعی FocusPlan</h3>
+<p class="about-text"><b>دستیار چه کار می‌کند؟</b> دستیار می‌تواند در محیط آفلاین از داده‌های همین FocusPlan برای بررسی برنامه‌ها، هدف‌ها، زمان مطالعه، تست‌ها و درس‌ها استفاده کند و برای برنامه‌ریزی و تحلیل راهنمایی بدهد. در حالت آنلاین، در صورت وجود اتصال و API سازگار، سؤال برای پردازش به سرویس آنلاین ارسال می‌شود.</p>
+<p class="about-text"><b>تاریخچه چت‌ها:</b> گفت‌وگوهای قبلی از داخل پنجره هوش مصنوعی قابل مشاهده‌اند و برای مرتب نگه‌داشتن محیط، هر گفت‌وگو را می‌توان جداگانه مدیریت یا حذف کرد.</p>
+<p class="about-text"><b>آفلاین:</b> اطلاعات FocusPlan در حالت آفلاین روی همین دستگاه خوانده می‌شود و برای پاسخ‌گویی آفلاین به سرور خارجی فرستاده نمی‌شود. آفلاین به معنی دانش نامحدود مثل یک مدل زبانی بزرگ نیست.</p>
+<p class="about-text"><b>آنلاین و API:</b> سرویس آنلاین به تنظیمات اتصال و endpoint وابسته است. کلید API نباید داخل فایل عمومی HTML قرار بگیرد؛ برای انتشار عمومی، نگه‌داری کلید روی سرور یا Cloudflare Worker امن‌تر است.</p>
+<p class="about-text"><b>حریم خصوصی:</b> در حالت آنلاین، متن سؤال و context موردنیاز ممکن است برای پردازش به سرویس انتخاب‌شده ارسال شود. قبل از استفاده آنلاین، شرایط سرویس موردنظر را بررسی کن.</p>
+</div>
+<p class="about-text"><b>۱. شروع برنامه و انتخاب مقطع:</b> در اولین ورود، متوسطه اول یا متوسطه دوم را انتخاب کن. در متوسطه اول پایه هفتم، هشتم یا نهم و در متوسطه دوم پایه دهم، یازدهم یا دوازدهم را انتخاب کن؛ برای متوسطه دوم رشته نیز قابل تعیین است.</p>
+<p class="about-text"><b>۲. ساخت پروفایل:</b> نام، نام خانوادگی، مدرسه و کلاس را وارد کن. این اطلاعات برای شخصی‌سازی برنامه و گزارش‌های هفتگی استفاده می‌شوند.</p>
+<p class="about-text"><b>۳. ورودهای بعدی:</b> می‌توانی با اطلاعات قبلی وارد شوی یا پروفایل جدید بسازی. داده‌های FocusPlan در حافظه مرورگر همان دستگاه نگه‌داری می‌شوند.</p>
+<p class="about-text"><b>۴. داشبورد:</b> داشبورد نمای سریع وضعیت امروز است؛ زمان مطالعه واقعی، تست‌ها، درصد انجام برنامه، هدف روزانه، برنامه‌ها و تست‌های امروز و بخش‌های مهم پیشرفت را نمایش می‌دهد. وضعیت‌ها با ثبت داده‌ها به‌روزرسانی می‌شوند.</p>
+<p class="about-text"><b>۵. برنامه‌ها:</b> برای هر برنامه تاریخ، درس، مبحث و زمان پیش‌بینی‌شده را ثبت کن. برنامه‌ها قابل ویرایش و حذف هستند و می‌توانی برنامه مهم را با ⭐ مشخص کنی. برنامه‌های مهم در بخش مخصوص خودشان قابل مشاهده‌اند.</p>
+<p class="about-text"><b>۶. انجام برنامه و ثبت مطالعه واقعی:</b> با انتخاب «انجام شد»، FocusPlan برای ثبت مطالعه واقعی از پنجره تکمیل استفاده می‌کند. زمان ثبت‌شده در آمار، نمودارها و گزارش PDF اثر می‌گذارد. اگر وضعیت انجام‌شده را برداری، رکورد مرتبط نیز مطابق منطق برنامه برمی‌گردد.</p>
+<p class="about-text"><b>۷. میزان تست:</b> مبحث، درس، تعداد تست و تاریخ را ثبت کن. تست‌ها نیز قابل ویرایش، حذف و مهم‌کردن هستند. هنگام تکمیل، تعداد واقعی و زمان تست‌زنی ثبت می‌شود تا در آمار و گزارش‌ها استفاده شود.</p>
+<p class="about-text"><b>۸. جست‌وجو، برچسب و یادداشت:</b> جست‌وجوی کلی برای پیدا کردن اطلاعات ثبت‌شده در برنامه در نظر گرفته شده است. برای درس‌ها می‌توان از برچسب‌ها و یادداشت‌های اختصاصی استفاده کرد تا اطلاعات مطالعاتی منظم‌تر باشند.</p>
+<p class="about-text"><b>۹. پیشنهاد برنامه فردا:</b> FocusPlan می‌تواند با توجه به وضعیت مطالعه و درس‌ها پیشنهادهایی برای فردا تولید کند. پیشنهادها قابل ویرایش، حذف و اضافه‌کردن دستی هستند و می‌توان پیشنهادهای نهایی را وارد برنامه کرد.</p>
+<p class="about-text"><b>۱۰. مرکز عملکرد:</b> این بخش برای بررسی روند پیشرفت است و داده‌هایی مانند مطالعه، تست، روزهای فعال، روند ۱۴روزه، تغییرات دوره‌ای و نمودار عملکرد درس‌ها را نمایش می‌دهد. هدف این قسمت این است که به‌جای نگاه‌کردن به یک عدد، روند مطالعه را ببینی.</p>
+<p class="about-text"><b>۱۱. اهداف و چالش‌های هفتگی:</b> در قابلیت‌های بیشتر می‌توان هدف مطالعه و هدف تست هفته را تعیین کرد. پیشرفت هدف به‌صورت زنده محاسبه می‌شود و چالش‌های هفتگی بر اساس عملکرد همان هفته نمایش داده می‌شوند.</p>
+<p class="about-text"><b>۱۲. سطح و XP:</b> XP از فعالیت‌های ثبت‌شده مانند زمان مطالعه، تست، انجام برنامه‌ها و فعالیت‌های مرتبط محاسبه می‌شود. سطح بر اساس XP افزایش پیدا می‌کند و سیستم‌های کنترلی برای جلوگیری از ثبت‌های غیرمنطقی در نظر گرفته شده‌اند.</p>
+<p class="about-text"><b>۱۳. دستاوردها و مدال‌ها:</b> مدال‌ها بر اساس دستاوردهای مختلف مانند مطالعه، تست، روزهای فعال، سطح و استمرار باز می‌شوند. هر مدال ظاهر اختصاصی خودش را دارد و می‌توان یک مدال بازشده را به‌عنوان مدال نمایشی داشبورد انتخاب کرد.</p>
+<p class="about-text"><b>۱۴. تایمر:</b> مدت و نام جلسه را تنظیم کن و تایمر را شروع کن. تایمر با جابه‌جایی بین تب‌ها حفظ می‌شود. بعد از پایان، پنجره تأیید نمایش داده می‌شود تا مشخص شود زمان واقعاً مطالعه شده است؛ سپس می‌توان درس مربوط را انتخاب کرد.</p>
+<p class="about-text"><b>۱۵. یادآور هوشمند:</b> در بخش تایمر می‌توان برای یک درس یا کار مطالعاتی، تاریخ و ساعت دقیق و نام یادآور را تعیین کرد. یادآورها قابل ویرایش و حذف هستند و در صورت پشتیبانی مرورگر از اعلان، می‌توان مجوز اعلان را فعال کرد. رفتار اعلان در حالت بسته‌بودن کامل سایت به قابلیت‌های مرورگر و محیط اجرا وابسته است.</p>
+<p class="about-text"><b>۱۶. آمار:</b> آمار، زمان مطالعه، تعداد تست، میانگین‌ها و جلسات ثبت‌شده را جمع‌بندی می‌کند. این داده‌ها از فعالیت‌هایی می‌آیند که واقعاً در FocusPlan ثبت شده‌اند.</p>
+<p class="about-text"><b>۱۷. PDF هفتگی:</b> گزارش هفته از شنبه تا جمعه ساخته می‌شود و می‌تواند مشخصات دانش‌آموز، خلاصه عملکرد، فعالیت روزانه، مطالعه واقعی، تست‌ها، زمان تست‌زنی و نمودارهای درسی را در قالب گزارش قابل چاپ نشان دهد.</p>
+<p class="about-text"><b>۱۸. دانلود و چاپ PDF:</b> ابتدا پیش‌نمایش گزارش را بررسی کن، سپس دانلود PDF را اجرا کن. اگر مرورگر دانلود مستقیم را پشتیبانی نکرد، گزینه چاپ و Save as PDF راه جایگزین است. طراحی گزارش برای خروجی کاغذی مستقل از تم تاریک برنامه تنظیم می‌شود.</p>
+<p class="about-text"><b>۱۹. آرشیوها:</b> گزارش‌های PDF هفته‌های گذشته و آرشیوهای مرتبط با نمودارها از داده‌های قبلی جدا نگه‌داری می‌شوند تا تغییرات هفته یا ماه جدید، گزارش‌های قبلی را از بین نبرد.</p>
+<p class="about-text"><b>۲۰. برنامه هفتگی مدرسه:</b> در «قابلیت‌های بیشتر» یک جدول شبیه برگه برنامه هفتگی مدرسه داری: ستون زنگ و پنج ستون شنبه تا چهارشنبه، با دقیقاً چهار زنگ. روی هر خانه کلیک کن، پنجره ثبت درس باز می‌شود، درس را بنویس و ذخیره کن. اگر خانه قبلاً پر شده باشد، با کلیک دوباره همان درس برای <b>ویرایش</b> داخل پنجره قرار می‌گیرد. اطلاعات جدول روی همان دستگاه ذخیره می‌شوند و داشبورد می‌تواند برنامه مدرسه روز جاری را نمایش دهد.</p>
+<p class="about-text"><b>۲۱. تنظیمات و شخصی‌سازی:</b> از تنظیمات می‌توان حالت روشن یا تاریک، پس‌زمینه‌ها، اطلاعات کاربری، درس‌های دلخواه و گزینه‌های مربوط به نصب را مدیریت کرد. پس‌زمینه‌ها برای هماهنگی با حالت نمایش طراحی شده‌اند.</p>
+<p class="about-text"><b>۲۲. درس‌های دلخواه:</b> اگر درس موردنیازت در فهرست نبود، می‌توانی آن را اضافه کنی. کنترل نام‌ها برای جلوگیری از ایجاد موارد تکراری در نظر گرفته شده است.</p>
+<p class="about-text"><b>۲۳. ریست امروز:</b> ریست امروز برای شروع دوباره وضعیت فعالیت‌های امروز است و باید قبل از تأیید، متن هشدار را بخوانی تا بدانی چه داده‌هایی تحت تأثیر قرار می‌گیرند.</p>
+<p class="about-text"><b>۲۴. پاک‌کردن اطلاعات:</b> گزینه حذف تمام اطلاعات، داده‌های ذخیره‌شده FocusPlan روی همان دستگاه را پاک می‌کند و قابل برگشت نیست؛ قبل از تأیید از اطلاعات مهمت مطمئن شو.</p>
+<p class="about-text"><b>۲۵. نصب روی گوشی:</b> اگر مرورگر نصب PWA را پشتیبانی کند، می‌توانی FocusPlan را به صفحه اصلی اضافه کنی. در بعضی مرورگرها این گزینه با نام Add to Home screen / افزودن به صفحه اصلی دیده می‌شود.</p>
+<p class="about-text"><b>۲۶. نگه‌داری اطلاعات:</b> نسخه فعلی داده‌های برنامه را در حافظه مرورگر همان دستگاه نگه می‌دارد. پاک‌کردن داده‌های سایت یا مرورگر می‌تواند برنامه‌ها، آمار و تنظیمات را حذف کند. برای حساب چنددستگاهی و ذخیره مرکزی، بک‌اند و پایگاه‌داده سمت سرور لازم است.</p>
+<p class="about-text"><b>۲۷. کار با چند دستگاه:</b> داده‌های LocalStorage به‌صورت خودکار بین گوشی، رایانه و دستگاه دیگر همگام نمی‌شوند. انتقال یا همگام‌سازی واقعی نیازمند زیرساخت سرور و حساب کاربری است.</p>
+<p class="about-text"><b>۲۸. دکمه بازگشت اندروید:</b> در نسخه‌های سازگار، دکمه برگشت برای خروج از پنجره‌ها و جابه‌جایی مناسب در رابط استفاده می‌شود و هدف آن این است که کاربر در صفحات داخلی گیر نکند.</p>
+</div></div>
+<div class="card creator-card"><div class="about-icon">👨‍💻</div><h3>سازنده</h3><p class="about-text">FocusPlan با هدف ساخت یک ابزار ساده، زیبا، سریع و کاربردی برای برنامه‌ریزی و پیگیری مطالعه دانش‌آموزان طراحی و توسعه داده شده است.</p><div class="creator-name">سید علی قراب بایگی</div><div class="creator-tag">Created by Ghorab</div></div>
+</div></section>
+<section class="section" id="settings"><h2>تنظیمات ⚙️</h2><div class="settings-shell"><div class="settings-intro"><div class="settings-intro-icon">⚙️</div><div><h3>شخصی‌سازی FocusPlan</h3><p>ظاهر، پس‌زمینه و اطلاعات کاربری را از این بخش مدیریت کن.</p></div></div><div class="settings-section-card"><div class="settings-section-head"><div><span class="settings-kicker">ظاهر برنامه</span><h3>🎨 حالت نمایش</h3><p>رابط برنامه را روشن یا تاریک کن.</p></div><span class="settings-section-icon">☀️</span></div><div class="theme-actions"><button class="theme-btn" id="lightThemeBtn" onclick="setTheme('light')" type="button">☀️ روشن</button><button class="theme-btn" id="darkThemeBtn" onclick="setTheme('dark')" type="button">🌙 تاریک</button></div></div><div class="settings-section-card settings-background-card"><div class="settings-section-head"><div><span class="settings-kicker">شخصی‌سازی پس‌زمینه</span><h3>🪄 ۱۰ پس‌زمینه رنگی</h3><p id="backgroundHint">برای هر رشته یا پایه ۱۰ طرح با رنگ‌های متفاوت، در حالت روشن و تاریک.</p></div><span class="settings-section-icon">🌈</span></div><div class="background-status"><span>انتخاب فعلی</span><b id="backgroundSelectedLabel">01</b></div><div class="background-grid" id="backgroundGrid"><button class="bg-card-choice" id="bg1Btn" onclick="setBackgroundVariant(1)" type="button"><i>01</i><span>پس‌زمینه 1</span></button><button class="bg-card-choice" id="bg2Btn" onclick="setBackgroundVariant(2)" type="button"><i>02</i><span>پس‌زمینه 2</span></button><button class="bg-card-choice" id="bg3Btn" onclick="setBackgroundVariant(3)" type="button"><i>03</i><span>پس‌زمینه 3</span></button><button class="bg-card-choice" id="bg4Btn" onclick="setBackgroundVariant(4)" type="button"><i>04</i><span>پس‌زمینه 4</span></button><button class="bg-card-choice" id="bg5Btn" onclick="setBackgroundVariant(5)" type="button"><i>05</i><span>پس‌زمینه 5</span></button><button class="bg-card-choice" id="bg6Btn" onclick="setBackgroundVariant(6)" type="button"><i>06</i><span>پس‌زمینه 6</span></button><button class="bg-card-choice" id="bg7Btn" onclick="setBackgroundVariant(7)" type="button"><i>07</i><span>پس‌زمینه 7</span></button><button class="bg-card-choice" id="bg8Btn" onclick="setBackgroundVariant(8)" type="button"><i>08</i><span>پس‌زمینه 8</span></button><button class="bg-card-choice" id="bg9Btn" onclick="setBackgroundVariant(9)" type="button"><i>09</i><span>پس‌زمینه 9</span></button><button class="bg-card-choice" id="bg10Btn" onclick="setBackgroundVariant(10)" type="button"><i>10</i><span>پس‌زمینه 10</span></button></div>
+<div class="premium-background-section" id="premiumBackgroundSection">
+<div class="premium-background-title"><span>✨</span><div><h3>پس‌زمینه‌های پرمیوم</h3><p>۲۰ طرح جدید و متفاوت؛ هر طرح با حالت روشن و تاریک تنظیمات هماهنگ می‌شود.</p></div></div>
+<div class="premium-background-grid" id="premiumBackgroundGrid"><button class="premium-bg-btn" id="premiumBg1Btn" onclick="setPremiumBackground(1)" type="button"><span class="premium-bg-preview pprev-1"></span><b>اورورا</b><small>پرمیوم 01</small></button><button class="premium-bg-btn" id="premiumBg2Btn" onclick="setPremiumBackground(2)" type="button"><span class="premium-bg-preview pprev-2"></span><b>کریستال</b><small>پرمیوم 02</small></button><button class="premium-bg-btn" id="premiumBg3Btn" onclick="setPremiumBackground(3)" type="button"><span class="premium-bg-preview pprev-3"></span><b>نئونی</b><small>پرمیوم 03</small></button><button class="premium-bg-btn" id="premiumBg4Btn" onclick="setPremiumBackground(4)" type="button"><span class="premium-bg-preview pprev-4"></span><b>شب قطبی</b><small>پرمیوم 04</small></button><button class="premium-bg-btn" id="premiumBg5Btn" onclick="setPremiumBackground(5)" type="button"><span class="premium-bg-preview pprev-5"></span><b>شفق طلایی</b><small>پرمیوم 05</small></button><button class="premium-bg-btn" id="premiumBg6Btn" onclick="setPremiumBackground(6)" type="button"><span class="premium-bg-preview pprev-6"></span><b>امواج</b><small>پرمیوم 06</small></button><button class="premium-bg-btn" id="premiumBg7Btn" onclick="setPremiumBackground(7)" type="button"><span class="premium-bg-preview pprev-7"></span><b>کهکشان</b><small>پرمیوم 07</small></button><button class="premium-bg-btn" id="premiumBg8Btn" onclick="setPremiumBackground(8)" type="button"><span class="premium-bg-preview pprev-8"></span><b>شیشه‌ای</b><small>پرمیوم 08</small></button><button class="premium-bg-btn" id="premiumBg9Btn" onclick="setPremiumBackground(9)" type="button"><span class="premium-bg-preview pprev-9"></span><b>سایبر</b><small>پرمیوم 09</small></button><button class="premium-bg-btn" id="premiumBg10Btn" onclick="setPremiumBackground(10)" type="button"><span class="premium-bg-preview pprev-10"></span><b>ابرهای رنگی</b><small>پرمیوم 10</small></button><button class="premium-bg-btn" id="premiumBg11Btn" onclick="setPremiumBackground(11)" type="button"><span class="premium-bg-preview pprev-11"></span><b>مخمل آبی</b><small>پرمیوم 11</small></button><button class="premium-bg-btn" id="premiumBg12Btn" onclick="setPremiumBackground(12)" type="button"><span class="premium-bg-preview pprev-12"></span><b>زمرد شب</b><small>پرمیوم 12</small></button><button class="premium-bg-btn" id="premiumBg13Btn" onclick="setPremiumBackground(13)" type="button"><span class="premium-bg-preview pprev-13"></span><b>رزگلد</b><small>پرمیوم 13</small></button><button class="premium-bg-btn" id="premiumBg14Btn" onclick="setPremiumBackground(14)" type="button"><span class="premium-bg-preview pprev-14"></span><b>یخی</b><small>پرمیوم 14</small></button><button class="premium-bg-btn" id="premiumBg15Btn" onclick="setPremiumBackground(15)" type="button"><span class="premium-bg-preview pprev-15"></span><b>آسمان شب</b><small>پرمیوم 15</small></button><button class="premium-bg-btn" id="premiumBg16Btn" onclick="setPremiumBackground(16)" type="button"><span class="premium-bg-preview pprev-16"></span><b>موج فیروزه‌ای</b><small>پرمیوم 16</small></button><button class="premium-bg-btn" id="premiumBg17Btn" onclick="setPremiumBackground(17)" type="button"><span class="premium-bg-preview pprev-17"></span><b>لاوا</b><small>پرمیوم 17</small></button><button class="premium-bg-btn" id="premiumBg18Btn" onclick="setPremiumBackground(18)" type="button"><span class="premium-bg-preview pprev-18"></span><b>مشکی لوکس</b><small>پرمیوم 18</small></button><button class="premium-bg-btn" id="premiumBg19Btn" onclick="setPremiumBackground(19)" type="button"><span class="premium-bg-preview pprev-19"></span><b>هولوگرافیک</b><small>پرمیوم 19</small></button><button class="premium-bg-btn" id="premiumBg20Btn" onclick="setPremiumBackground(20)" type="button"><span class="premium-bg-preview pprev-20"></span><b>دیپ‌اسپیس</b><small>پرمیوم 20</small></button></div>
+</div>
+<div class="settings-note">💡 رنگ‌ها برای هر رشته متفاوت‌اند و در حالت روشن و تاریک نسخه هماهنگ دارند.</div></div><div class="settings-section-card"><div class="settings-section-head"><div><span class="settings-kicker">حساب کاربری</span><h3>👤 اطلاعات کاربری</h3><p>اطلاعات ذخیره‌شده پروفایل فعلی.</p></div><span class="settings-section-icon">👤</span></div><div class="profile-mirror" id="profileMirror"><div><span>نام</span><b id="profileMirrorName">—</b></div><div><span>مدرسه</span><b id="profileMirrorSchool">—</b></div><div><span>کلاس</span><b id="profileMirrorClass">—</b></div><div><span>مقطع / رشته</span><b id="profileMirrorStream">—</b></div><div><span>پایه</span><b id="profileMirrorGrade">—</b></div></div><div class="profile-info-note">🔐 این اطلاعات مربوط به پروفایل فعلی هستند و در همین دستگاه ذخیره می‌شوند.</div><hr/><h3>➕ افزودن درس دلخواه</h3><div class="form"><input id="customSubject" placeholder="مثلاً زبان فرانسه / درس اختصاصی من"/><button class="btn" onclick="addCustomSubject()">افزودن درس</button></div><div id="customSubjectList"></div><p class="muted">درس‌های اضافه‌شده در همین دستگاه ذخیره می‌شوند.</p></div><div class="settings-section-card"><div class="settings-section-head"><div><span class="settings-kicker">امکانات برنامه</span><h3>📱 نصب و مدیریت</h3><p>FocusPlan را روی صفحه اصلی قرار بده یا اطلاعات را مدیریت کن.</p></div><span class="settings-section-icon">📱</span></div><button class="btn" id="installAppBtn" onclick="installFocusPlan()" type="button">➕ افزودن به صفحه اصلی</button><p class="muted" id="installHint">FocusPlan را مثل یک برنامه روی صفحه اصلی گوشی قرار بده.</p><button class="btn danger" onclick="clearAll()">پاک کردن تمام اطلاعات</button></div></div></section>
+</main><footer class="site-credit"><div>Created by Ghorab</div><b>سید علی قراب بایگی</b></footer></div>
+<script src="./js/fp-02.js"></script>
+
+
+
+
+
+
+
+
+<script id="fp-v202-upgrade-script" src="./js/fp-03.js"></script>
+<script src="./js/fp-04.js"></script>
+</body>
+
+
+<script id="fp-ultra-ai-script" src="./js/fp-05.js"></script>
+
+
+<script id="fp-performance-pro-v123-script" src="./js/fp-06.js"></script>
+</html>
+
+
+
+<script id="fp-global-search-script" src="./js/fp-07.js"></script>
+
